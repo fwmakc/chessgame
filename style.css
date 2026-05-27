@@ -210,40 +210,69 @@ button:hover {
   cursor: default;
 }
 
-/* ===== HIGHLIGHTS ===== */
-.square.selected::before {
-  background: var(--highlight-selected) !important;
-  filter: none !important;
+/* ===== SQUARE STATE OVERLAYS ===== */
+/* ::before is used for base square background + state overlays */
+/* ::after is used for valid-move / valid-capture indicators */
+
+/* State overlays on ::before */
+.square.visited::before {
+  background-color: var(--board-visited-color);
+  background-image: var(--board-visited-image);
+  background-size: var(--board-visited-size);
+  background-repeat: var(--board-visited-repeat);
+  background-position: var(--board-visited-position);
+  filter: none;
 }
 
 .square.last-move::before {
-  background: var(--highlight-last-move) !important;
-  filter: none !important;
+  background-color: var(--board-last-move-color);
+  background-image: var(--board-last-move-image);
+  background-size: var(--board-last-move-size);
+  background-repeat: var(--board-last-move-repeat);
+  background-position: var(--board-last-move-position);
+  filter: none;
 }
 
 .square.check::before {
-  background: var(--highlight-check) !important;
-  filter: none !important;
+  background-color: var(--board-check-color);
+  background-image: var(--board-check-image);
+  background-size: var(--board-check-size);
+  background-repeat: var(--board-check-repeat);
+  background-position: var(--board-check-position);
+  filter: none;
 }
 
-/* Valid move indicators */
+.square.selected::before {
+  background-color: var(--board-selected-color);
+  background-image: var(--board-selected-image);
+  background-size: var(--board-selected-size);
+  background-repeat: var(--board-selected-repeat);
+  background-position: var(--board-selected-position);
+  filter: none;
+}
+
+/* Valid move / capture indicators on ::after */
 .square.valid-move::after {
   content: '';
   position: absolute;
-  width: calc(var(--square-size) * 0.27);
-  height: calc(var(--square-size) * 0.27);
-  background: var(--highlight-valid-move);
-  border-radius: 50%;
+  inset: 0;
+  background-color: var(--board-valid-move-color);
+  background-image: var(--board-valid-move-image);
+  background-size: var(--board-valid-move-size);
+  background-repeat: var(--board-valid-move-repeat);
+  background-position: var(--board-valid-move-position);
   z-index: 2;
 }
 
 .square.valid-capture::after {
   content: '';
   position: absolute;
-  width: 100%;
-  height: 100%;
-  border: calc(var(--square-size) * 0.067) solid var(--highlight-valid-capture);
-  border-radius: 50%;
+  inset: 0;
+  background-color: var(--board-valid-capture-color);
+  background-image: var(--board-valid-capture-image);
+  background-size: var(--board-valid-capture-size);
+  background-repeat: var(--board-valid-capture-repeat);
+  background-position: var(--board-valid-capture-position);
   z-index: 2;
 }
 

@@ -1,7 +1,6 @@
 import { createInitialState, getPiece, loadGameConfig, serializeState, deserializeState } from './board.js';
-import { getLegalMoves, getAllLegalMoves } from './moves.js';
+import { getLegalMoves, getAllLegalMoves, isInCheck, findKing } from './moves.js';
 import { makeMove, getGameStatus, isGameOver, isVictory } from './game.js';
-import { isInCheck } from './moves.js';
 import { findBestMove, getPieceValue } from './ai.js';
 import { getPiecePaths, setPiecesBasePath } from './piece-assets.js';
 import { posToString } from './board.js';
@@ -612,6 +611,8 @@ class ChessGame {
             ? Array.from({ length: this.state.height }, (_, i) => this.state.height - 1 - i)
             : Array.from({ length: this.state.height }, (_, i) => i);
         const cols = Array.from({ length: this.state.width }, (_, i) => i);
+        const kingInCheck = isInCheck(this.state, this.state.turn);
+        const kingPos = kingInCheck ? findKing(this.state, this.state.turn) : null;
         for (const row of rows) {
             for (const col of cols) {
                 const square = document.createElement('div');
@@ -631,6 +632,10 @@ class ChessGame {
                     pieceEl.appendChild(img);
                     square.appendChild(pieceEl);
                 }
+                // Highlight visited squares
+                if (this.state.visitedSquares[row][col]) {
+                    square.classList.add('visited');
+                }
                 // Highlight last move
                 if (this.lastMove) {
                     if ((this.lastMove.from.row === row && this.lastMove.from.col === col) ||
@@ -641,6 +646,10 @@ class ChessGame {
                 // Highlight selected
                 if (this.selectedSquare && this.selectedSquare.row === row && this.selectedSquare.col === col) {
                     square.classList.add('selected');
+                }
+                // Highlight check
+                if (kingPos && kingPos.row === row && kingPos.col === col) {
+                    square.classList.add('check');
                 }
                 // Highlight valid moves
                 const isValidMove = this.validMoves.some(m => m.to.row === row && m.to.col === col);

@@ -54,12 +54,47 @@
   --board-wall-image: none;
   --board-wall-filter: none;
 
-  /* ===== HIGHLIGHTS ===== */
-  --highlight-selected: #7b61ff;
-  --highlight-last-move: #aaffaa;
-  --highlight-check: #ff6b6b;
-  --highlight-valid-move: rgba(0, 0, 0, 0.2);
-  --highlight-valid-capture: rgba(0, 0, 0, 0.3);
+  /* ===== SELECTED SQUARE ===== */
+  --board-selected-color: #7b61ff;
+  --board-selected-image: none;
+  --board-selected-size: cover;
+  --board-selected-repeat: no-repeat;
+  --board-selected-position: center;
+
+  /* ===== VISITED SQUARE (e.g. knight tour) ===== */
+  --board-visited-color: rgba(255, 215, 0, 0.2);
+  --board-visited-image: none;
+  --board-visited-size: cover;
+  --board-visited-repeat: no-repeat;
+  --board-visited-position: center;
+
+  /* ===== LAST MOVE SQUARE ===== */
+  --board-last-move-color: #aaffaa;
+  --board-last-move-image: none;
+  --board-last-move-size: cover;
+  --board-last-move-repeat: no-repeat;
+  --board-last-move-position: center;
+
+  /* ===== CHECK SQUARE ===== */
+  --board-check-color: #ff6b6b;
+  --board-check-image: none;
+  --board-check-size: cover;
+  --board-check-repeat: no-repeat;
+  --board-check-position: center;
+
+  /* ===== VALID MOVE INDICATOR ===== */
+  --board-valid-move-color: rgba(0, 0, 0, 0.2);
+  --board-valid-move-image: none;
+  --board-valid-move-size: 27%;
+  --board-valid-move-repeat: no-repeat;
+  --board-valid-move-position: center;
+
+  /* ===== VALID CAPTURE INDICATOR ===== */
+  --board-valid-capture-color: rgba(0, 0, 0, 0.3);
+  --board-valid-capture-image: none;
+  --board-valid-capture-size: cover;
+  --board-valid-capture-repeat: no-repeat;
+  --board-valid-capture-position: center;
 
   /* ===== PIECES ===== */
   --piece-size: 50px;
