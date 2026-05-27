@@ -1,0 +1,90 @@
+{
+  "name": "Шашки",
+  "victoryCondition": { "type": "annihilation" },
+  "forcedCapture": true,
+  "moveTimeLimit": 30,
+  "board": {
+    "width": 8,
+    "height": 8,
+    "initialPieces": [
+      { "type": "checker", "color": "black", "row": 0, "col": 0 },
+      { "type": "checker", "color": "black", "row": 0, "col": 2 },
+      { "type": "checker", "color": "black", "row": 0, "col": 4 },
+      { "type": "checker", "color": "black", "row": 0, "col": 6 },
+      { "type": "checker", "color": "black", "row": 1, "col": 1 },
+      { "type": "checker", "color": "black", "row": 1, "col": 3 },
+      { "type": "checker", "color": "black", "row": 1, "col": 5 },
+      { "type": "checker", "color": "black", "row": 1, "col": 7 },
+      { "type": "checker", "color": "black", "row": 2, "col": 0 },
+      { "type": "checker", "color": "black", "row": 2, "col": 2 },
+      { "type": "checker", "color": "black", "row": 2, "col": 4 },
+      { "type": "checker", "color": "black", "row": 2, "col": 6 },
+      { "type": "checker", "color": "white", "row": 5, "col": 1 },
+      { "type": "checker", "color": "white", "row": 5, "col": 3 },
+      { "type": "checker", "color": "white", "row": 5, "col": 5 },
+      { "type": "checker", "color": "white", "row": 5, "col": 7 },
+      { "type": "checker", "color": "white", "row": 6, "col": 0 },
+      { "type": "checker", "color": "white", "row": 6, "col": 2 },
+      { "type": "checker", "color": "white", "row": 6, "col": 4 },
+      { "type": "checker", "color": "white", "row": 6, "col": 6 },
+      { "type": "checker", "color": "white", "row": 7, "col": 1 },
+      { "type": "checker", "color": "white", "row": 7, "col": 3 },
+      { "type": "checker", "color": "white", "row": 7, "col": 5 },
+      { "type": "checker", "color": "white", "row": 7, "col": 7 }
+    ],
+    "squares": [
+      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
+      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
+      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
+      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"]
+    ]
+  },
+  "pieces": {
+    "pieceTypes": {
+      "checker": {
+        "value": 1,
+        "behaviors": [
+          {
+            "vectors": [[1, -1], [-1, -1]],
+            "slide": false,
+            "move": true,
+            "capture": false
+          },
+          {
+            "vectors": [[2, -2], [-2, -2]],
+            "slide": false,
+            "move": true,
+            "capture": false,
+            "jumpCapture": true,
+            "conditions": ["multiCapture"]
+          }
+        ],
+        "special": ["promotion"],
+        "promotionTarget": "checkerKing"
+      },
+      "checkerKing": {
+        "value": 3,
+        "behaviors": [
+          {
+            "vectors": [[1, 1], [1, -1], [-1, 1], [-1, -1]],
+            "slide": true,
+            "move": true,
+            "capture": false
+          },
+          {
+            "vectors": [[1, 1], [1, -1], [-1, 1], [-1, -1]],
+            "slide": true,
+            "move": true,
+            "capture": false,
+            "jumpCapture": true,
+            "conditions": ["multiCapture"]
+          }
+        ]
+      }
+    }
+  }
+}

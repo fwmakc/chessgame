@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 504 504" width="504" height="504">
+  <defs>
+    <!-- Wood texture gradient for the play area -->
+    <linearGradient id="wood" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c9a87c"/>
+      <stop offset="50%" stop-color="#b8956a"/>
+      <stop offset="100%" stop-color="#a67c52"/>
+    </linearGradient>
+    <!-- Dark border/label area gradient -->
+    <linearGradient id="border" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3d2b1f"/>
+      <stop offset="100%" stop-color="#2a1d15"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer background (labels area) -->
+  <rect x="0" y="0" width="504" height="504" fill="url(#border)"/>
+
+  <!-- Inner play area (will be covered by CSS squares) -->
+  <rect x="24" y="0" width="480" height="480" fill="url(#wood)"/>
+
+  <!-- Thin frame line around the play area -->
+  <rect x="24" y="0" width="480" height="480" fill="none" stroke="#2a1d15" stroke-width="2"/>
+
+  <!-- Rank numbers (8-1) on the left -->
+  <g fill="#e8dcc8" font-family="Georgia, 'Times New Roman', serif" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="middle">
+    <text x="12" y="30">8</text>
+    <text x="12" y="90">7</text>
+    <text x="12" y="150">6</text>
+    <text x="12" y="210">5</text>
+    <text x="12" y="270">4</text>
+    <text x="12" y="330">3</text>
+    <text x="12" y="390">2</text>
+    <text x="12" y="450">1</text>
+  </g>
+
+  <!-- File letters (a-h) on the bottom -->
+  <g fill="#e8dcc8" font-family="Georgia, 'Times New Roman', serif" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="middle">
+    <text x="54" y="492">a</text>
+    <text x="114" y="492">b</text>
+    <text x="174" y="492">c</text>
+    <text x="234" y="492">d</text>
+    <text x="294" y="492">e</text>
+    <text x="354" y="492">f</text>
+    <text x="414" y="492">g</text>
+    <text x="474" y="492">h</text>
+  </g>
+</svg>

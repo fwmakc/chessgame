@@ -1,0 +1,117 @@
+{
+  "name": "Мат в 2 хода",
+  "victoryCondition": { "type": "checkmate", "targetPiece": "king" },
+  "moveCountLimit": 2,
+  "board": {
+    "width": 8,
+    "height": 8,
+    "initialPieces": [
+      { "type": "king", "color": "white", "row": 7, "col": 4 },
+      { "type": "rook", "color": "white", "row": 7, "col": 3 },
+      { "type": "bishop", "color": "white", "row": 4, "col": 5 },
+      { "type": "knight", "color": "white", "row": 3, "col": 6 },
+      { "type": "queen", "color": "white", "row": 3, "col": 7 },
+      { "type": "king", "color": "black", "row": 0, "col": 4 },
+      { "type": "pawn", "color": "black", "row": 1, "col": 4 }
+    ]
+  },
+  "pieces": {
+    "pieceTypes": {
+      "bishop": {
+        "value": 330,
+        "behaviors": [
+          {
+            "vectors": [[1, 1], [1, -1], [-1, 1], [-1, -1]],
+            "slide": true,
+            "move": true,
+            "capture": true
+          }
+        ]
+      },
+      "knight": {
+        "value": 320,
+        "behaviors": [
+          {
+            "vectors": [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]],
+            "slide": false,
+            "move": true,
+            "capture": true
+          }
+        ]
+      },
+      "rook": {
+        "value": 500,
+        "behaviors": [
+          {
+            "vectors": [[1, 0], [-1, 0], [0, 1], [0, -1]],
+            "slide": true,
+            "move": true,
+            "capture": true
+          }
+        ]
+      },
+      "queen": {
+        "value": 900,
+        "behaviors": [
+          {
+            "vectors": [[1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [-1, 0], [0, 1], [0, -1]],
+            "slide": true,
+            "move": true,
+            "capture": true
+          }
+        ]
+      },
+      "king": {
+        "value": 20000,
+        "behaviors": [
+          {
+            "vectors": [[1, 1], [1, 0], [1, -1], [0, 1], [0, -1], [-1, 1], [-1, 0], [-1, -1]],
+            "slide": false,
+            "move": true,
+            "capture": true
+          }
+        ],
+        "special": ["castling", "vulnerable"],
+        "castling": [
+          {
+            "partnerType": "rook",
+            "searchDirection": 1,
+            "kingTarget": [2, 0],
+            "partnerTarget": [-1, 0]
+          },
+          {
+            "partnerType": "rook",
+            "searchDirection": -1,
+            "kingTarget": [-2, 0],
+            "partnerTarget": [1, 0]
+          }
+        ]
+      },
+      "pawn": {
+        "value": 100,
+        "behaviors": [
+          {
+            "vectors": [[0, -1]],
+            "slide": false,
+            "move": true,
+            "capture": false
+          },
+          {
+            "vectors": [[0, -2]],
+            "slide": false,
+            "move": true,
+            "capture": false,
+            "conditions": ["fromStartRank", "clearPath"]
+          },
+          {
+            "vectors": [[1, -1], [-1, -1]],
+            "slide": false,
+            "move": false,
+            "capture": true
+          }
+        ],
+        "special": ["enPassant", "promotion"]
+      }
+    }
+  }
+}

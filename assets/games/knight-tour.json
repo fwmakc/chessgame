@@ -1,0 +1,37 @@
+{
+  "name": "Ход конём",
+  "victoryCondition": { "type": "visitedAll" },
+  "board": {
+    "width": 8,
+    "height": 8,
+    "initialPieces": [
+      { "type": "knight", "color": "white", "row": 0, "col": 0 }
+    ],
+    "squares": [
+      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
+      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
+      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
+      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"]
+    ]
+  },
+  "pieces": {
+    "pieceTypes": {
+      "knight": {
+        "value": 1,
+        "behaviors": [
+          {
+            "vectors": [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]],
+            "slide": false,
+            "move": true,
+            "capture": false
+          }
+        ],
+        "special": ["noRevisit"]
+      }
+    }
+  }
+}

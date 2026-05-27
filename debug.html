@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Debug</title></head>
+<body>
+<script type="module">
+  try {
+    const res = await fetch('assets/games/mate-in-2.json');
+    const config = await res.json();
+    console.log('Config loaded:', config);
+    
+    const boardRes = await import('./dist/board.js');
+    const gameRes = await import('./dist/game.js');
+    
+    const state = boardRes.createInitialState(config.board);
+    state.victoryCondition = config.victoryCondition;
+    state.moveCountLimit = config.moveCountLimit ?? 0;
+    console.log('State created:', state);
+    
+    const status = gameRes.getGameStatus(state);
+    console.log('Status:', status);
+    
+    document.body.innerHTML = '<pre>' + JSON.stringify({ status, state: { turn: state.turn, fullmoveNumber: state.fullmoveNumber, moveCountLimit: state.moveCountLimit } }, null, 2) + '</pre>';
+  } catch (e) {
+    console.error('Error:', e);
+    document.body.innerHTML = '<pre style="color:red">' + e.stack + '</pre>';
+  }
+</script>
+</body>
+</html>

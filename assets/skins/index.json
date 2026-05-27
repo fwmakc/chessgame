@@ -1,0 +1,14 @@
+[
+  {
+    "id": "default",
+    "name": "Классический",
+    "piecesPath": "assets/skins/default/pieces",
+    "boardCss": "assets/skins/default/board.css"
+  },
+  {
+    "id": "minimal",
+    "name": "Минималистичный",
+    "piecesPath": "assets/skins/minimal/pieces",
+    "boardCss": "assets/skins/minimal/board.css"
+  }
+]

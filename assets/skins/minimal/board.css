@@ -1,0 +1,66 @@
+/* ============================================
+   BOARD CUSTOMIZATION
+   Change these variables to customize the board
+   ============================================ */
+
+:root {
+  /* ===== BOARD FRAME ===== */
+  --board-frame-bg: #34495e;
+  --board-frame-padding: 10px;
+  --board-frame-radius: 8px;
+  --board-frame-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  --board-border: #2c3e50;
+
+  /* ===== LABELS / NOTATION MARGINS =====
+     If your board-bg.png includes letters/numbers around edges,
+     set these so the 8x8 grid aligns with the playable area.
+     Example: 24px left for rank numbers, 24px bottom for file letters. */
+  --board-label-top: 0px;
+  --board-label-right: 0px;
+  --board-label-bottom: 24px;
+  --board-label-left: 24px;
+
+  /* ===== ENTIRE BOARD BACKGROUND ===== */
+  --board-bg-image: url('assets/board/board-bg.svg');
+  --board-bg-size: cover;
+  --board-bg-position: center;
+  --board-bg-repeat: no-repeat;
+  /* Filter applied ONLY to the board background layer (not pieces) */
+  --board-filter: none;
+
+  /* ===== DARK SQUARES ===== */
+  --board-dark-color: #555;
+  --board-dark-image: none;
+  --board-dark-size: cover;
+  --board-dark-repeat: no-repeat;
+  --board-dark-position: center;
+  /* Filter applied ONLY to dark square backgrounds (not pieces) */
+  --board-dark-filter: none;
+
+  /* ===== LIGHT SQUARES ===== */
+  --board-light-color: #e0e0e0;
+  --board-light-image: none;
+  --board-light-size: cover;
+  --board-light-repeat: no-repeat;
+  --board-light-position: center;
+  /* Filter applied ONLY to light square backgrounds (not pieces) */
+  --board-light-filter: none;
+
+  /* ===== SQUARE SIZE ===== */
+  --square-size: 60px;
+
+  /* ===== WALL SQUARES ===== */
+  --board-wall-color: #222;
+  --board-wall-image: none;
+  --board-wall-filter: none;
+
+  /* ===== HIGHLIGHTS ===== */
+  --highlight-selected: #7b61ff;
+  --highlight-last-move: #aaffaa;
+  --highlight-check: #ff6b6b;
+  --highlight-valid-move: rgba(0, 0, 0, 0.2);
+  --highlight-valid-capture: rgba(0, 0, 0, 0.3);
+
+  /* ===== PIECES ===== */
+  --piece-size: 50px;
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Шахматы</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Шахматы</h1>
+    <div class="game-info">
+      <div id="status">Ход белых</div>
+      <div id="move-timer"></div>
+      <div id="game-timer"></div>
+      <div id="move-counter"></div>
+      <div id="mode">
+        <label>
+          <input type="radio" name="mode" value="pvp" checked> Два игрока
+        </label>
+        <label>
+          <input type="radio" name="mode" value="ai"> Против компьютера
+        </label>
+        <select id="ai-color">
+          <option value="white">Играть за белых</option>
+          <option value="black">Играть за чёрных</option>
+        </select>
+        <label>
+          <input type="checkbox" id="flip-board"> Развернуть доску
+        </label>
+        <label>
+          Игра:
+          <select id="game-select"></select>
+        </label>
+        <label>
+          Скин:
+          <select id="skin-select"></select>
+        </label>
+      </div>
+      <button id="new-game">Новая игра</button>
+      <button id="undo-move">Отменить ход</button>
+    </div>
+    <div class="game-layout">
+      <div class="board-wrapper">
+        <div class="board-bg"></div>
+        <div id="board"></div>
+      </div>
+      <div class="move-history-panel">
+        <h3>История ходов</h3>
+        <div id="move-history"></div>
+        <div class="history-stats">
+          <div class="stat-row"><span class="stat-label">Общее время:</span><span id="total-time">0:00</span></div>
+          <div class="stat-row"><span class="stat-label">Белые:</span><span id="white-time">0:00</span> (<span id="white-avg">—</span>)</div>
+          <div class="stat-row"><span class="stat-label">Забрано белыми:</span><span id="white-captures">0 фиг. (0 очк.)</span></div>
+          <div class="stat-row"><span class="stat-label">Чёрные:</span><span id="black-time">0:00</span> (<span id="black-avg">—</span>)</div>
+          <div class="stat-row"><span class="stat-label">Забрано чёрными:</span><span id="black-captures">0 фиг. (0 очк.)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="dist/main.js"></script>
+</body>
+</html>
