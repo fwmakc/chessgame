@@ -1,4 +1,4 @@
-import { GameState, Move, MoveResult, Position, Color, PieceType } from './types.js';
+import { GameState, Move, MoveResult, Position, Color, PieceType, BoardConfig } from './types.js';
 import { createInitialState, getPiece, loadGameConfig, serializeState, deserializeState } from './board.js';
 import { getLegalMoves, getAllLegalMoves, isInCheck, findKing } from './moves.js';
 import { makeMove, getGameStatus, isGameOver, isVictory } from './game.js';
@@ -31,6 +31,7 @@ interface PersistedSettings {
   mode?: 'pvp' | 'ai';
   playerColor?: Color;
   flipBoard?: boolean;
+  levelIndex?: number;
 }
 
 const SETTINGS_KEY = 'chessgame_settings';
@@ -60,6 +61,9 @@ class ChessGame {
   private currentConfigUrl = GAME_CONFIGS[0];
   private skins: Map<string, SkinConfig> = new Map();
   private currentSkinId = 'default';
+  private currentLevelIndex = 0;
+  private levelProgress = new Map<string, { completed: number[] }>();
+  private levelCompletedThisSession = false;
   private moveTimerInterval: number | null = null;
   private moveTimerDeadline = 0;
   private gameTimerInterval: number | null = null;
@@ -96,6 +100,131 @@ class ChessGame {
       select.appendChild(option);
     }
     select.value = this.currentConfigUrl;
+  }
+
+  private populateLevelSelect(): void {
+    const wrapper = document.getElementById('level-select-wrapper') as HTMLLabelElement;
+    const select = document.getElementById('level-select') as HTMLSelectElement;
+    const list = document.getElementById('level-list') as HTMLDivElement;
+    if (!wrapper || !select || !list) return;
+
+    const config = this.gameConfigs.get(this.currentConfigUrl);
+    const levels = config?.levels;
+    const mode = config?.levelSelect ?? 'disabled';
+
+    if (!levels) {
+      wrapper.style.display = 'none';
+      list.style.display = 'none';
+      return;
+    }
+
+    const progress = this.loadLevelProgress();
+
+    if (mode === 'disabled') {
+      wrapper.style.display = 'none';
+      list.style.display = 'flex';
+      list.innerHTML = '';
+
+      for (let i = 0; i < levels.length; i++) {
+        const item = document.createElement('div');
+        item.className = 'level-item';
+
+        const isCompleted = progress.completed.includes(i);
+        const isCurrent = i === this.currentLevelIndex;
+        const isUnlocked = i === 0 || progress.completed.includes(i - 1) || isCompleted;
+
+        if (isCompleted) {
+          item.classList.add('completed');
+        } else if (isCurrent) {
+          item.classList.add('current');
+        } else if (!isUnlocked) {
+          item.classList.add('locked');
+        }
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = levels[i].name;
+        item.appendChild(nameSpan);
+
+        if (isCompleted) {
+          const check = document.createElement('span');
+          check.className = 'level-check';
+          check.textContent = '✓';
+          item.appendChild(check);
+        }
+
+        list.appendChild(item);
+      }
+      return;
+    }
+
+    // mode === 'select' or 'random'
+    wrapper.style.display = '';
+    list.style.display = 'none';
+    select.innerHTML = '';
+    for (let i = 0; i < levels.length; i++) {
+      const option = document.createElement('option');
+      option.value = String(i);
+      option.textContent = levels[i].name;
+      const isUnlocked = i === 0 || progress.completed.includes(i - 1) || progress.completed.includes(i);
+      if (mode === 'select' && !isUnlocked) {
+        option.disabled = true;
+      }
+      select.appendChild(option);
+    }
+    select.value = String(this.currentLevelIndex);
+  }
+
+  private loadLevelProgress(): { completed: number[] } {
+    const key = `chessgame_levels_${this.currentConfigUrl}`;
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) return JSON.parse(raw);
+    } catch {
+      // ignore
+    }
+    return { completed: [] };
+  }
+
+  private saveLevelProgress(): void {
+    const key = `chessgame_levels_${this.currentConfigUrl}`;
+    const progress = this.loadLevelProgress();
+    localStorage.setItem(key, JSON.stringify(progress));
+  }
+
+  private completeCurrentLevel(): void {
+    const config = this.gameConfigs.get(this.currentConfigUrl);
+    if (!config?.levels) return;
+    const progress = this.loadLevelProgress();
+    if (!progress.completed.includes(this.currentLevelIndex)) {
+      progress.completed.push(this.currentLevelIndex);
+      const key = `chessgame_levels_${this.currentConfigUrl}`;
+      localStorage.setItem(key, JSON.stringify(progress));
+    }
+  }
+
+  private selectLevel(index: number): void {
+    this.currentLevelIndex = index;
+    this.saveSettings();
+    this.clearGameSave();
+    this.newGame();
+  }
+
+  private getLevelBoardConfig(): BoardConfig {
+    const config = this.gameConfigs.get(this.currentConfigUrl);
+    if (config?.levels && config.levels.length > 0) {
+      const idx = Math.max(0, Math.min(this.currentLevelIndex, config.levels.length - 1));
+      return config.levels[idx].board;
+    }
+    return config!.board;
+  }
+
+  private getCurrentLevelName(): string | null {
+    const config = this.gameConfigs.get(this.currentConfigUrl);
+    if (config?.levels && config.levels.length > 0) {
+      const idx = Math.max(0, Math.min(this.currentLevelIndex, config.levels.length - 1));
+      return config.levels[idx].name;
+    }
+    return null;
   }
 
   private async loadSkins(): Promise<void> {
@@ -144,6 +273,9 @@ class ChessGame {
       if (settings.flipBoard !== undefined) {
         this.flipBoard = settings.flipBoard;
       }
+      if (settings.levelIndex !== undefined) {
+        this.currentLevelIndex = settings.levelIndex;
+      }
     } catch (e) {
       console.error('Failed to load settings:', e);
     }
@@ -156,6 +288,7 @@ class ChessGame {
       mode: this.mode,
       playerColor: this.playerColor,
       flipBoard: this.flipBoard,
+      levelIndex: this.currentLevelIndex,
     };
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
@@ -211,6 +344,7 @@ class ChessGame {
       : 0;
     const save = {
       configUrl: this.currentConfigUrl,
+      currentLevelIndex: this.currentLevelIndex,
       state: serializeState(this.state),
       selectedSquare: this.selectedSquare,
       validMoves: this.validMoves,
@@ -253,6 +387,7 @@ class ChessGame {
       if (config) {
         setPieceConfig(config.pieces);
       }
+      this.currentLevelIndex = save.currentLevelIndex ?? 0;
       this.state = deserializeState(save.state);
       this.selectedSquare = save.selectedSquare ?? null;
       this.validMoves = save.validMoves ?? [];
@@ -454,11 +589,16 @@ class ChessGame {
     this.setupUI();
     this.populateGameSelect();
     this.populateSkinSelect();
+    this.populateLevelSelect();
     this.applySettingsToUI();
     this.applySkin(this.currentSkinId);
-    await this.newGame();
-    if (!this.tryLoadGame()) {
-      // Fresh game started, save initial state
+    const loaded = this.tryLoadGame();
+    if (!loaded) {
+      const config = this.gameConfigs.get(this.currentConfigUrl);
+      if (config?.levelSelect === 'random' && config.levels && config.levels.length > 0) {
+        this.currentLevelIndex = Math.floor(Math.random() * config.levels.length);
+      }
+      await this.newGame();
       this.saveGame();
       if (this.mode === 'ai' && this.playerColor === 'black') {
         this.makeAIMove();
@@ -510,14 +650,20 @@ class ChessGame {
       this.confirmRestart(
         () => {
           this.currentConfigUrl = newUrl;
+          this.currentLevelIndex = 0;
           this.saveSettings();
           this.clearGameSave();
+          this.populateLevelSelect();
           this.newGame();
         },
         () => {
           select.value = oldUrl;
         }
       );
+    });
+    document.getElementById('level-select')!.addEventListener('change', (e) => {
+      const index = parseInt((e.target as HTMLSelectElement).value, 10);
+      this.selectLevel(index);
     });
     document.getElementById('skin-select')!.addEventListener('change', (e) => {
       this.applySkin((e.target as HTMLSelectElement).value);
@@ -582,13 +728,15 @@ class ChessGame {
     this.whiteScore = 0;
     this.blackScore = 0;
     this.captureHistory = [];
+    this.levelCompletedThisSession = false;
     this.renderHistory();
     document.getElementById('promotion-modal')!.classList.remove('active');
 
     const config = this.gameConfigs.get(this.currentConfigUrl);
     if (config) {
       setPieceConfig(config.pieces);
-      this.state = createInitialState(config.board);
+      const boardConfig = this.getLevelBoardConfig();
+      this.state = createInitialState(boardConfig);
       this.state.victoryCondition = config.victoryCondition;
       this.state.forcedCapture = config.forcedCapture ?? false;
       this.state.moveTimeLimit = config.moveTimeLimit ?? 0;
@@ -742,11 +890,32 @@ class ChessGame {
 
   private updateStatus(): void {
     const statusEl = document.getElementById('status')!;
-    statusEl.textContent = getGameStatus(this.state);
+    const levelName = this.getCurrentLevelName();
+    const baseStatus = getGameStatus(this.state);
+    statusEl.textContent = levelName ? `${levelName} — ${baseStatus}` : baseStatus;
     this.updateMoveCounterDisplay();
 
     if (isGameOver(this.state)) {
       this.aiThinking = true;
+      if (!this.levelCompletedThisSession) {
+        const victory = isVictory(this.state);
+        if (victory) {
+          this.levelCompletedThisSession = true;
+          this.completeCurrentLevel();
+          // Auto-advance to next level if available
+          const config = this.gameConfigs.get(this.currentConfigUrl);
+          if (config?.levels && this.currentLevelIndex + 1 < config.levels.length) {
+            this.currentLevelIndex++;
+            this.saveSettings();
+            this.saveGame();
+            this.populateLevelSelect();
+            const nextName = config.levels[this.currentLevelIndex].name;
+            statusEl.textContent = `Победа! Следующий уровень: ${nextName}. Нажмите «Новая игра»`;
+            return;
+          }
+          this.populateLevelSelect();
+        }
+      }
     }
   }
 

@@ -50,6 +50,11 @@ export interface PieceConfig {
   pieceTypes: Partial<Record<PieceType, PieceTypeConfig>>;
 }
 
+export interface LevelConfig {
+  name: string;
+  board: BoardConfig;
+}
+
 export interface GameConfig {
   name: string;
   victoryCondition: VictoryCondition;
@@ -57,6 +62,8 @@ export interface GameConfig {
   moveTimeLimit?: number; // seconds, 0 = no limit
   gameTimeLimit?: number; // minutes, 0 = no limit
   moveCountLimit?: number; // full moves, 0 = no limit
+  levelSelect?: 'disabled' | 'select' | 'random';
+  levels?: LevelConfig[];
   board: BoardConfig;
   pieces: PieceConfig;
 }

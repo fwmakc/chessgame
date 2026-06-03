@@ -1,21 +1,76 @@
 {
   "name": "Ход конём",
   "victoryCondition": { "type": "visitedAll" },
+  "levelSelect": "disabled",
+  "levels": [
+    {
+      "name": "5×5",
+      "board": {
+        "width": 5,
+        "height": 5,
+        "initialPieces": [
+          { "type": "knight", "color": "white", "row": 0, "col": 0 }
+        ],
+        "squares": [
+          ["dark", "light", "dark", "light", "dark"],
+          ["light", "dark", "light", "dark", "light"],
+          ["dark", "light", "dark", "light", "dark"],
+          ["light", "dark", "light", "dark", "light"],
+          ["dark", "light", "dark", "light", "dark"]
+        ]
+      }
+    },
+    {
+      "name": "6×6",
+      "board": {
+        "width": 6,
+        "height": 6,
+        "initialPieces": [
+          { "type": "knight", "color": "white", "row": 0, "col": 0 }
+        ],
+        "squares": [
+          ["dark", "light", "dark", "light", "dark", "light"],
+          ["light", "dark", "light", "dark", "light", "dark"],
+          ["dark", "light", "dark", "light", "dark", "light"],
+          ["light", "dark", "light", "dark", "light", "dark"],
+          ["dark", "light", "dark", "light", "dark", "light"],
+          ["light", "dark", "light", "dark", "light", "dark"]
+        ]
+      }
+    },
+    {
+      "name": "8×8",
+      "board": {
+        "width": 8,
+        "height": 8,
+        "initialPieces": [
+          { "type": "knight", "color": "white", "row": 0, "col": 0 }
+        ],
+        "squares": [
+          ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+          ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
+          ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+          ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
+          ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+          ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
+          ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
+          ["light", "dark", "light", "dark", "light", "dark", "light", "dark"]
+        ]
+      }
+    }
+  ],
   "board": {
-    "width": 8,
-    "height": 8,
+    "width": 5,
+    "height": 5,
     "initialPieces": [
       { "type": "knight", "color": "white", "row": 0, "col": 0 }
     ],
     "squares": [
-      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
-      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
-      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
-      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
-      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
-      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"],
-      ["dark", "light", "dark", "light", "dark", "light", "dark", "light"],
-      ["light", "dark", "light", "dark", "light", "dark", "light", "dark"]
+      ["dark", "light", "dark", "light", "dark"],
+      ["light", "dark", "light", "dark", "light"],
+      ["dark", "light", "dark", "light", "dark"],
+      ["light", "dark", "light", "dark", "light"],
+      ["dark", "light", "dark", "light", "dark"]
     ]
   },
   "pieces": {

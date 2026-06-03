@@ -491,3 +491,44 @@ button:hover {
 .promotion-option:hover {
   background: #ecf0f1;
 }
+
+#level-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  max-width: 200px;
+}
+
+.level-item {
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ecf0f1;
+  color: #2c3e50;
+}
+
+.level-item.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.level-item.current {
+  background: #cce5ff;
+  color: #004085;
+  font-weight: bold;
+}
+
+.level-item.locked {
+  background: #bdc3c7;
+  color: #7f8c8d;
+}
+
+.level-check {
+  margin-left: 8px;
+  font-weight: bold;
+}
