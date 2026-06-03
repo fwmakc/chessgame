@@ -1,9 +1,9 @@
-import { GameState, Move, MoveResult, Position, Color, PieceType, BoardConfig } from './types.js';
+import { GameState, Move, MoveResult, Position, Color, PieceType, BoardConfig, PiecePhase } from './types.js';
 import { createInitialState, getPiece, loadGameConfig, serializeState, deserializeState } from './board.js';
 import { getLegalMoves, getAllLegalMoves, isInCheck, findKing } from './moves.js';
 import { makeMove, getGameStatus, isGameOver, isVictory } from './game.js';
 import { findBestMove, getPieceValue } from './ai.js';
-import { getPiecePaths, setPiecesBasePath } from './piece-assets.js';
+import { getPiecePaths, getPiecePath, setPiecesBasePath } from './piece-assets.js';
 import { posToString } from './board.js';
 import { getPieceConfig, setPieceConfig } from './piece-config.js';
 import { cloneState } from './board.js';
@@ -845,6 +845,23 @@ class ChessGame {
     }
   }
 
+  private getPiecePhase(piece: { id: number; color: Color; type: PieceType }, pos: Position): PiecePhase {
+    // Selected
+    if (this.selectedSquare?.row === pos.row && this.selectedSquare?.col === pos.col) {
+      return 'selected';
+    }
+    // Moving / Attacking (last move)
+    if (this.lastMove) {
+      if (this.lastMove.to.row === pos.row && this.lastMove.to.col === pos.col) {
+        const movedPiece = getPiece(this.state, this.lastMove.to);
+        if (movedPiece && movedPiece.id === piece.id) {
+          return this.lastMove.isCapture ? 'attacking' : 'moving';
+        }
+      }
+    }
+    return 'default';
+  }
+
   private performRender(boardEl: HTMLElement): void {
     boardEl.innerHTML = '';
     boardEl.style.gridTemplateColumns = `repeat(${this.state.width}, var(--square-size))`;
@@ -884,8 +901,16 @@ class ChessGame {
           pieceEl.className = 'piece';
           pieceEl.dataset.pieceId = String(piece.id);
           const img = document.createElement('img');
-          img.src = getPiecePaths()[piece.color][piece.type];
+          const phase = this.getPiecePhase(piece, { row, col });
+          const path = getPiecePath(piece.color, piece.type, phase);
+          img.src = path;
           img.alt = `${piece.color} ${piece.type}`;
+          if (phase !== 'default') {
+            img.onerror = () => {
+              img.src = getPiecePath(piece.color, piece.type, 'default');
+              img.onerror = null;
+            };
+          }
 
           // Mirror pieces based on board position
           const typeConfig = getPieceConfig().pieceTypes[piece.type];
@@ -1151,7 +1176,7 @@ class ChessGame {
     this.aiThinking = true;
     setTimeout(() => {
       try {
-        const move = findBestMove(this.state, 3);
+        const move = findBestMove(this.state, 4);
         if (move) {
           const prevState = cloneState(this.state);
           const result = makeMove(this.state, move);
@@ -1224,9 +1249,9 @@ class ChessGame {
       return result.move.to.col > result.move.from.col ? 'O-O' : 'O-O-O';
     }
 
-    let notation = posToString(result.move.from) + '-' + posToString(result.move.to);
+    let notation = posToString(result.move.from, this.state.height) + '-' + posToString(result.move.to, this.state.height);
     if (result.captured) {
-      notation = posToString(result.move.from) + 'x' + posToString(result.move.to);
+      notation = posToString(result.move.from, this.state.height) + 'x' + posToString(result.move.to, this.state.height);
     }
     if (result.promotion) {
       notation += '=' + result.promotion.charAt(0).toUpperCase();

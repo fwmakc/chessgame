@@ -1,6 +1,6 @@
-import { GameState, Move, Color, PieceType } from './types.js';
-import { cloneState } from './board.js';
-import { getAllLegalMoves, isInCheck } from './moves.js';
+import { GameState, Move, Color, PieceType, Position, Piece } from './types.js';
+import { cloneState, getPiece, setPiece } from './board.js';
+import { getAllLegalMoves, getPseudoLegalMoves } from './moves.js';
 import { makeMove, isVictory } from './game.js';
 import { getPieceConfig } from './piece-config.js';
 
@@ -24,157 +24,222 @@ export function getPieceValue(type: PieceType): number {
   return DEFAULT_PIECE_VALUES[type] ?? 0;
 }
 
-// Simple piece-square tables (from white's perspective, flip for black)
-const PAWN_TABLE = [
-  [0,  0,  0,  0,  0,  0,  0,  0],
-  [50, 50, 50, 50, 50, 50, 50, 50],
-  [10, 10, 20, 30, 30, 20, 10, 10],
-  [5,  5, 10, 25, 25, 10,  5,  5],
-  [0,  0,  0, 20, 20,  0,  0,  0],
-  [5, -5,-10,  0,  0,-10, -5,  5],
-  [5, 10, 10,-20,-20, 10, 10,  5],
-  [0,  0,  0,  0,  0,  0,  0,  0],
-];
+// ---------- Attack Map ----------
 
-const KNIGHT_TABLE = [
-  [-50,-40,-30,-30,-30,-30,-40,-50],
-  [-40,-20,  0,  0,  0,  0,-20,-40],
-  [-30,  0, 10, 15, 15, 10,  0,-30],
-  [-30,  5, 15, 20, 20, 15,  5,-30],
-  [-30,  0, 15, 20, 20, 15,  0,-30],
-  [-30,  5, 10, 15, 15, 10,  5,-30],
-  [-40,-20,  0,  5,  5,  0,-20,-40],
-  [-50,-40,-30,-30,-30,-30,-40,-50],
-];
+interface AttackerInfo {
+  piece: Piece;
+  from: Position;
+  value: number;
+}
 
-const BISHOP_TABLE = [
-  [-20,-10,-10,-10,-10,-10,-10,-20],
-  [-10,  0,  0,  0,  0,  0,  0,-10],
-  [-10,  0,  5, 10, 10,  5,  0,-10],
-  [-10,  5,  5, 10, 10,  5,  5,-10],
-  [-10,  0, 10, 10, 10, 10,  0,-10],
-  [-10, 10, 10, 10, 10, 10, 10,-10],
-  [-10,  5,  0,  0,  0,  0,  5,-10],
-  [-20,-10,-10,-10,-10,-10,-10,-20],
-];
+type SquareAttackers = AttackerInfo[] | undefined;
 
-const ROOK_TABLE = [
-  [0,  0,  0,  0,  0,  0,  0,  0],
-  [5, 10, 10, 10, 10, 10, 10,  5],
-  [-5,  0,  0,  0,  0,  0,  0, -5],
-  [-5,  0,  0,  0,  0,  0,  0, -5],
-  [-5,  0,  0,  0,  0,  0,  0, -5],
-  [-5,  0,  0,  0,  0,  0,  0, -5],
-  [-5,  0,  0,  0,  0,  0,  0, -5],
-  [0,  0,  0,  5,  5,  0,  0,  0],
-];
+interface AttackMap {
+  white: SquareAttackers[][];
+  black: SquareAttackers[][];
+}
 
-const QUEEN_TABLE = [
-  [-20,-10,-10, -5, -5,-10,-10,-20],
-  [-10,  0,  0,  0,  0,  0,  0,-10],
-  [-10,  0,  5,  5,  5,  5,  0,-10],
-  [-5,  0,  5,  5,  5,  5,  0, -5],
-  [0,  0,  5,  5,  5,  5,  0, -5],
-  [-10,  5,  5,  5,  5,  5,  0,-10],
-  [-10,  0,  5,  0,  0,  0,  0,-10],
-  [-20,-10,-10, -5, -5,-10,-10,-20],
-];
+function buildAttackMap(state: GameState): AttackMap {
+  const emptyRow: SquareAttackers[] = Array.from({ length: state.width }, () => undefined);
+  const map: AttackMap = {
+    white: Array.from({ length: state.height }, () => emptyRow.slice()),
+    black: Array.from({ length: state.height }, () => emptyRow.slice()),
+  };
 
-const KING_MIDDLE_TABLE = [
-  [-30,-40,-40,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-40,-40,-30],
-  [-30,-40,-40,-50,-50,-40,-40,-30],
-  [-20,-30,-30,-40,-40,-30,-30,-20],
-  [-10,-20,-20,-20,-20,-20,-20,-10],
-  [20, 20,  0,  0,  0,  0, 20, 20],
-  [20, 30, 10,  0,  0, 10, 30, 20],
-];
-
-const CHECKER_TABLE = Array.from({ length: 8 }, () => Array(8).fill(0));
-const CHECKER_KING_TABLE = Array.from({ length: 8 }, () => Array(8).fill(0));
-
-const TABLES: Record<PieceType, number[][]> = {
-  pawn: PAWN_TABLE,
-  knight: KNIGHT_TABLE,
-  bishop: BISHOP_TABLE,
-  rook: ROOK_TABLE,
-  queen: QUEEN_TABLE,
-  king: KING_MIDDLE_TABLE,
-  checker: CHECKER_TABLE,
-  checkerKing: CHECKER_KING_TABLE,
-};
-
-function evaluateState(state: GameState): number {
-  let score = 0;
   for (let row = 0; row < state.height; row++) {
     for (let col = 0; col < state.width; col++) {
       const piece = state.board[row][col];
       if (!piece) continue;
-      const value = getPieceValue(piece.type);
-      const table = TABLES[piece.type];
-      // Clamp row index to table bounds for non-standard board sizes
-      const tableRow = Math.min(piece.color === 'white' ? row : 7 - row, 7);
-      const tableCol = Math.min(col, 7);
-      const posValue = table[tableRow][tableCol];
-      const total = value + posValue;
-      score += piece.color === 'white' ? total : -total;
+
+      const moves = getPseudoLegalMoves(state, { row, col });
+      const isPawn = piece.type === 'pawn';
+
+      for (const move of moves) {
+        if (isPawn && !move.isCapture) continue;
+        if (piece.type === 'king' && Math.abs(move.to.col - move.from.col) > 1) continue;
+
+        const list = map[piece.color][move.to.row][move.to.col];
+        const info: AttackerInfo = {
+          piece,
+          from: { row, col },
+          value: getPieceValue(piece.type),
+        };
+        if (list) {
+          list.push(info);
+        } else {
+          map[piece.color][move.to.row][move.to.col] = [info];
+        }
+      }
     }
   }
+
+  return map;
+}
+
+function getAttackers(map: AttackMap, square: Position, color: Color): AttackerInfo[] {
+  return map[color][square.row][square.col] ?? [];
+}
+
+// ---------- SEE (Static Exchange Evaluation) ----------
+
+function see(state: GameState, square: Position, attackingColor: Color, depth: number = 0): number {
+  if (depth > 10) return 0;
+
+  let bestAttacker: AttackerInfo | null = null;
+
+  for (let row = 0; row < state.height; row++) {
+    for (let col = 0; col < state.width; col++) {
+      const piece = state.board[row][col];
+      if (!piece || piece.color !== attackingColor) continue;
+
+      const moves = getPseudoLegalMoves(state, { row, col });
+      const isPawn = piece.type === 'pawn';
+
+      const canAttack = moves.some(m => {
+        if (isPawn && !m.isCapture) return false;
+        if (piece.type === 'king' && Math.abs(m.to.col - m.from.col) > 1) return false;
+        return m.to.row === square.row && m.to.col === square.col;
+      });
+
+      if (canAttack) {
+        const val = getPieceValue(piece.type);
+        if (!bestAttacker || val < bestAttacker.value) {
+          bestAttacker = { piece, from: { row, col }, value: val };
+        }
+      }
+    }
+  }
+
+  if (!bestAttacker) return 0;
+
+  const capturedPiece = getPiece(state, square);
+  if (!capturedPiece) return 0;
+
+  const capturedValue = getPieceValue(capturedPiece.type);
+
+  const newState = cloneState(state);
+  setPiece(newState, bestAttacker.from, null);
+  setPiece(newState, square, bestAttacker.piece);
+
+  const recursiveValue = see(newState, square, attackingColor === 'white' ? 'black' : 'white', depth + 1);
+
+  return capturedValue - recursiveValue;
+}
+
+// ---------- Evaluation ----------
+
+function evaluateState(state: GameState): number {
+  let whiteMaterial = 0;
+  let blackMaterial = 0;
+  let whiteHanging = 0;
+  let blackHanging = 0;
+
+  const attackMap = buildAttackMap(state);
+
+  for (let row = 0; row < state.height; row++) {
+    for (let col = 0; col < state.width; col++) {
+      const piece = state.board[row][col];
+      if (!piece) continue;
+
+      const value = getPieceValue(piece.type);
+      if (piece.color === 'white') whiteMaterial += value;
+      else blackMaterial += value;
+
+      const enemyColor = piece.color === 'white' ? 'black' : 'white';
+      const attackers = getAttackers(attackMap, { row, col }, enemyColor);
+      const defenders = getAttackers(attackMap, { row, col }, piece.color);
+
+      if (attackers.length > 0 && defenders.length === 0) {
+        if (piece.color === 'white') whiteHanging += value;
+        else blackHanging += value;
+      }
+    }
+  }
+
+  const whiteMoves = getAllLegalMoves(state, 'white').length;
+  const blackMoves = getAllLegalMoves(state, 'black').length;
+
+  const materialScore = whiteMaterial - blackMaterial;
+  const hangingScore = -(whiteHanging - blackHanging) * 0.8;
+  const mobilityScore = (whiteMoves - blackMoves) * 10;
+
+  const score = materialScore + hangingScore + mobilityScore;
   return state.turn === 'white' ? score : -score;
 }
 
-function sortMoves(state: GameState, moves: Move[]): Move[] {
-  return moves.sort((a, b) => {
-    const aPiece = state.board[a.to.row][a.to.col];
-    const bPiece = state.board[b.to.row][b.to.col];
-    const aCapture = aPiece ? getPieceValue(aPiece.type) : 0;
-    const bCapture = bPiece ? getPieceValue(bPiece.type) : 0;
-    return bCapture - aCapture;
-  });
+// ---------- Quiescence Search ----------
+
+function quiescence(state: GameState, alpha: number, beta: number, qDepth: number = 0): number {
+  const standPat = evaluateState(state);
+  if (standPat >= beta) return beta;
+  if (alpha < standPat) alpha = standPat;
+
+  if (qDepth > 10) return alpha;
+
+  const moves = getAllLegalMoves(state, state.turn);
+  const captures = moves.filter(m => state.board[m.to.row][m.to.col] !== null);
+
+  const ordered = sortMoves(state, captures);
+
+  for (const move of ordered) {
+    const newState = cloneState(state);
+    makeMove(newState, move);
+    const score = -quiescence(newState, -beta, -alpha, qDepth + 1);
+    if (score >= beta) return beta;
+    if (score > alpha) alpha = score;
+  }
+
+  return alpha;
 }
 
-function minimax(state: GameState, depth: number, alpha: number, beta: number, maximizing: boolean): number {
+// ---------- Move Ordering ----------
+
+function scoreMove(state: GameState, move: Move): number {
+  const targetPiece = state.board[move.to.row][move.to.col];
+  if (targetPiece) {
+    const seeValue = see(state, move.to, state.turn);
+    if (seeValue > 0) return 1000000 + seeValue;
+    if (seeValue === 0) return 500000;
+    return -500000 + seeValue;
+  }
+  return 0;
+}
+
+function sortMoves(state: GameState, moves: Move[]): Move[] {
+  return moves.slice().sort((a, b) => scoreMove(state, b) - scoreMove(state, a));
+}
+
+// ---------- Minimax ----------
+
+function minimax(state: GameState, depth: number, alpha: number, beta: number): number {
   if (depth === 0) {
-    return evaluateState(state);
+    return quiescence(state, alpha, beta);
   }
 
   const moves = getAllLegalMoves(state, state.turn);
   if (moves.length === 0) {
     if (isVictory(state)) {
-      return maximizing ? -100000 + depth : 100000 - depth;
+      return -100000 + depth;
     }
-    return 0; // stalemate
+    return 0;
   }
 
   const sortedMoves = sortMoves(state, moves);
 
-  if (maximizing) {
-    let maxEval = -Infinity;
-    for (const move of sortedMoves) {
-      const newState = cloneState(state);
-      makeMove(newState, move);
-      const evalScore = minimax(newState, depth - 1, alpha, beta, false);
-      maxEval = Math.max(maxEval, evalScore);
-      alpha = Math.max(alpha, evalScore);
-      if (beta <= alpha) break;
-    }
-    return maxEval;
-  } else {
-    let minEval = Infinity;
-    for (const move of sortedMoves) {
-      const newState = cloneState(state);
-      makeMove(newState, move);
-      const evalScore = minimax(newState, depth - 1, alpha, beta, true);
-      minEval = Math.min(minEval, evalScore);
-      beta = Math.min(beta, evalScore);
-      if (beta <= alpha) break;
-    }
-    return minEval;
+  for (const move of sortedMoves) {
+    const newState = cloneState(state);
+    makeMove(newState, move);
+    const evalScore = -minimax(newState, depth - 1, -beta, -alpha);
+    if (evalScore >= beta) return beta;
+    if (evalScore > alpha) alpha = evalScore;
   }
+
+  return alpha;
 }
 
-export function findBestMove(state: GameState, depth: number = 3): Move | null {
+// ---------- Public API ----------
+
+export function findBestMove(state: GameState, depth: number = 4): Move | null {
   const moves = getAllLegalMoves(state, state.turn);
   if (moves.length === 0) return null;
 
@@ -185,7 +250,7 @@ export function findBestMove(state: GameState, depth: number = 3): Move | null {
   for (const move of sortedMoves) {
     const newState = cloneState(state);
     makeMove(newState, move);
-    const value = minimax(newState, depth - 1, -Infinity, Infinity, false);
+    const value = -minimax(newState, depth - 1, -Infinity, Infinity);
     if (value > bestValue) {
       bestValue = value;
       bestMove = move;

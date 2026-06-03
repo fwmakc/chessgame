@@ -170,9 +170,9 @@ export function setPiece(state: GameState, pos: Position, piece: Piece | null): 
   state.board[pos.row][pos.col] = piece;
 }
 
-export function posToString(pos: Position): string {
+export function posToString(pos: Position, height: number = 8): string {
   const files = 'abcdefghijklmnopqrstuvwxyz';
-  return files[pos.col] + (pos.row + 1);
+  return files[pos.col] + (height - pos.row);
 }
 
 export function stringToPos(s: string, height: number = 8): Position {

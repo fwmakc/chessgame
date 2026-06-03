@@ -110,7 +110,12 @@ export function isSquareAttacked(state: GameState, pos: Position, byColor: Color
       const piece = state.board[row][col];
       if (piece && piece.color === byColor) {
         const moves = getPseudoLegalMoves(state, { row, col });
-        if (moves.some(m => m.to.row === pos.row && m.to.col === pos.col)) {
+        // Pawns only attack diagonally, not straight forward
+        const isPawn = piece.type === 'pawn';
+        if (moves.some(m => {
+          if (isPawn && !m.isCapture) return false;
+          return m.to.row === pos.row && m.to.col === pos.col;
+        })) {
           return true;
         }
       }

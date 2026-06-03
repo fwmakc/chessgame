@@ -2,6 +2,8 @@ export type Color = 'white' | 'black';
 export type PieceType = 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king' | 'checker' | 'checkerKing';
 export type SquareType = 'light' | 'dark' | 'wall';
 
+export type PiecePhase = 'default' | 'selected' | 'moving' | 'attacking' | 'defeated';
+
 export interface Piece {
   id: number;
   type: PieceType;
