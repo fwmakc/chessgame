@@ -10,5 +10,11 @@
     "name": "Минималистичный",
     "piecesPath": "assets/skins/minimal/pieces",
     "boardCss": "assets/skins/minimal/board.css"
+  },
+  {
+    "id": "staunton3d",
+    "name": "Стаунтон 3D",
+    "piecesPath": "assets/skins/staunton3d/pieces",
+    "boardCss": "assets/skins/staunton3d/board.css"
   }
 ]

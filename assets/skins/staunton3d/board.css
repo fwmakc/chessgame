@@ -1,0 +1,86 @@
+:root {
+  --board-frame-bg: #3d2b1f;
+  --board-frame-padding: 12px;
+  --board-frame-radius: 6px;
+  --board-frame-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  --board-border: #2a1d15;
+
+  --board-label-top: 0px;
+  --board-label-right: 0px;
+  --board-label-bottom: 24px;
+  --board-label-left: 24px;
+
+  --board-bg-image: url('assets/board/board-bg.svg');
+  --board-bg-size: cover;
+  --board-bg-position: center;
+  --board-bg-repeat: no-repeat;
+  --board-filter: none;
+
+  --board-dark-color: #b58863;
+  --board-dark-image: none;
+  --board-dark-size: cover;
+  --board-dark-repeat: no-repeat;
+  --board-dark-position: center;
+  --board-dark-filter: none;
+
+  --board-light-color: #f0d9b5;
+  --board-light-image: none;
+  --board-light-size: cover;
+  --board-light-repeat: no-repeat;
+  --board-light-position: center;
+  --board-light-filter: none;
+
+  --square-size: 60px;
+
+  --board-wall-color: #5a5a5a;
+  --board-wall-image: none;
+  --board-wall-filter: none;
+
+  --board-selected-color: #7b61ff;
+  --board-selected-image: none;
+  --board-selected-size: cover;
+  --board-selected-repeat: no-repeat;
+  --board-selected-position: center;
+
+  --board-visited-color: rgba(255, 215, 0, 0.25);
+  --board-visited-image: none;
+  --board-visited-size: cover;
+  --board-visited-repeat: no-repeat;
+  --board-visited-position: center;
+
+  --board-last-move-color: #aaffaa;
+  --board-last-move-image: none;
+  --board-last-move-size: cover;
+  --board-last-move-repeat: no-repeat;
+  --board-last-move-position: center;
+
+  --board-check-color: #ff6b6b;
+  --board-check-image: none;
+  --board-check-size: cover;
+  --board-check-repeat: no-repeat;
+  --board-check-position: center;
+
+  --board-valid-move-color: rgba(0, 0, 0, 0.2);
+  --board-valid-move-image: none;
+  --board-valid-move-size: 27%;
+  --board-valid-move-repeat: no-repeat;
+  --board-valid-move-position: center;
+
+  --board-valid-capture-color: rgba(0, 0, 0, 0.3);
+  --board-valid-capture-image: none;
+  --board-valid-capture-size: cover;
+  --board-valid-capture-repeat: no-repeat;
+  --board-valid-capture-position: center;
+
+  --piece-size: 76px;
+}
+
+.board-wrapper .piece {
+  align-items: flex-end !important;
+}
+
+.board-wrapper .piece img {
+  height: auto !important;
+}
+
+
