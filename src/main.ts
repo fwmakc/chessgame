@@ -334,7 +334,7 @@ class ChessGame {
     }
   }
 
-  private saveGame(): void {
+  private buildSaveObject(): any {
     const now = Date.now();
     const moveTimerRemaining = this.moveTimerInterval !== null
       ? Math.max(0, Math.ceil((this.moveTimerDeadline - now) / 1000))
@@ -342,7 +342,8 @@ class ChessGame {
     const gameTimerRemaining = this.gameTimerInterval !== null
       ? Math.max(0, Math.ceil((this.gameTimerDeadline - now) / 1000))
       : 0;
-    const save = {
+    return {
+      version: 1,
       configUrl: this.currentConfigUrl,
       currentLevelIndex: this.currentLevelIndex,
       state: serializeState(this.state),
@@ -367,10 +368,88 @@ class ChessGame {
       moveTimerRemaining,
       gameTimerRemaining,
     };
+  }
+
+  private saveGame(): void {
     try {
-      localStorage.setItem(GAME_SAVE_KEY, JSON.stringify(save));
+      localStorage.setItem(GAME_SAVE_KEY, JSON.stringify(this.buildSaveObject()));
     } catch (e) {
       console.error('Failed to save game:', e);
+    }
+  }
+
+  private saveToFile(): void {
+    const save = this.buildSaveObject();
+    const blob = new Blob([JSON.stringify(save, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const gameName = this.gameConfigs.get(this.currentConfigUrl)?.name ?? 'game';
+    const dateStr = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    a.download = `${gameName}-${dateStr}.json`;
+    a.href = url;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private restoreFromSave(save: any): void {
+    // Switch game config if needed
+    if (save.configUrl && save.configUrl !== this.currentConfigUrl) {
+      if (!this.gameConfigs.has(save.configUrl)) {
+        throw new Error('Unknown game in save file');
+      }
+      this.currentConfigUrl = save.configUrl;
+      this.saveSettings();
+      const gameSelect = document.getElementById('game-select') as HTMLSelectElement;
+      if (gameSelect) gameSelect.value = this.currentConfigUrl;
+    }
+
+    const config = this.gameConfigs.get(this.currentConfigUrl);
+    if (config) {
+      setPieceConfig(config.pieces);
+    }
+
+    this.currentLevelIndex = save.currentLevelIndex ?? 0;
+    this.state = deserializeState(save.state);
+    this.selectedSquare = save.selectedSquare ?? null;
+    this.validMoves = save.validMoves ?? [];
+    this.lastMove = save.lastMove ?? null;
+    this.moveHistory = save.moveHistory ?? [];
+    this.stateHistory = (save.stateHistory ?? []).map(deserializeState);
+    this.captureHistory = save.captureHistory ?? [];
+    const now = Date.now();
+    this.gameStartTime = now - (save.elapsedGameTime ?? 0);
+    this.moveStartTime = now - (save.moveElapsedTime ?? 0);
+    this.whiteTotalTime = save.whiteTotalTime ?? 0;
+    this.blackTotalTime = save.blackTotalTime ?? 0;
+    this.whiteMoveCount = save.whiteMoveCount ?? 0;
+    this.blackMoveCount = save.blackMoveCount ?? 0;
+    this.whiteCaptures = save.whiteCaptures ?? 0;
+    this.blackCaptures = save.blackCaptures ?? 0;
+    this.whiteScore = save.whiteScore ?? 0;
+    this.blackScore = save.blackScore ?? 0;
+    this.multiCaptureActive = save.multiCaptureActive ?? false;
+    this.multiCapturePos = save.multiCapturePos ?? null;
+    this.aiThinking = false;
+    this.promotionPending = null;
+    this.levelCompletedThisSession = false;
+
+    this.render();
+    this.renderHistory();
+    this.populateLevelSelect();
+
+    if (save.moveTimerRemaining > 0 && this.state.moveTimeLimit > 0) {
+      this.startMoveTimer(save.moveTimerRemaining);
+    } else {
+      this.updateMoveTimerDisplay(0);
+    }
+    if (save.gameTimerRemaining > 0 && this.state.gameTimeLimit > 0) {
+      this.startGameTimer(save.gameTimerRemaining);
+    } else {
+      this.updateGameTimerDisplay(0);
+    }
+
+    if (this.mode === 'ai' && !isGameOver(this.state) && this.state.turn !== this.playerColor) {
+      this.makeAIMove();
     }
   }
 
@@ -383,48 +462,7 @@ class ChessGame {
         this.clearGameSave();
         return false;
       }
-      const config = this.gameConfigs.get(this.currentConfigUrl);
-      if (config) {
-        setPieceConfig(config.pieces);
-      }
-      this.currentLevelIndex = save.currentLevelIndex ?? 0;
-      this.state = deserializeState(save.state);
-      this.selectedSquare = save.selectedSquare ?? null;
-      this.validMoves = save.validMoves ?? [];
-      this.lastMove = save.lastMove ?? null;
-      this.moveHistory = save.moveHistory ?? [];
-      this.stateHistory = (save.stateHistory ?? []).map(deserializeState);
-      this.captureHistory = save.captureHistory ?? [];
-      const now = Date.now();
-      this.gameStartTime = now - (save.elapsedGameTime ?? 0);
-      this.moveStartTime = now - (save.moveElapsedTime ?? 0);
-      this.whiteTotalTime = save.whiteTotalTime ?? 0;
-      this.blackTotalTime = save.blackTotalTime ?? 0;
-      this.whiteMoveCount = save.whiteMoveCount ?? 0;
-      this.blackMoveCount = save.blackMoveCount ?? 0;
-      this.whiteCaptures = save.whiteCaptures ?? 0;
-      this.blackCaptures = save.blackCaptures ?? 0;
-      this.whiteScore = save.whiteScore ?? 0;
-      this.blackScore = save.blackScore ?? 0;
-      this.multiCaptureActive = save.multiCaptureActive ?? false;
-      this.multiCapturePos = save.multiCapturePos ?? null;
-      this.aiThinking = false;
-      this.promotionPending = null;
-      this.render();
-      this.renderHistory();
-      if (save.moveTimerRemaining > 0 && this.state.moveTimeLimit > 0) {
-        this.startMoveTimer(save.moveTimerRemaining);
-      } else {
-        this.updateMoveTimerDisplay(0);
-      }
-      if (save.gameTimerRemaining > 0 && this.state.gameTimeLimit > 0) {
-        this.startGameTimer(save.gameTimerRemaining);
-      } else {
-        this.updateGameTimerDisplay(0);
-      }
-      if (this.mode === 'ai' && !isGameOver(this.state) && this.state.turn !== this.playerColor) {
-        this.makeAIMove();
-      }
+      this.restoreFromSave(save);
       return true;
     } catch (e) {
       console.error('Failed to load game:', e);
@@ -612,6 +650,25 @@ class ChessGame {
       this.newGame();
     });
     document.getElementById('undo-move')!.addEventListener('click', () => this.undoMove());
+    document.getElementById('save-game')!.addEventListener('click', () => this.saveToFile());
+    const fileInput = document.getElementById('load-file-input') as HTMLInputElement;
+    document.getElementById('load-game')!.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files || files.length === 0) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const save = JSON.parse(event.target?.result as string);
+          this.restoreFromSave(save);
+          this.saveGame();
+        } catch (err) {
+          alert('Не удалось загрузить файл: ' + (err as Error).message);
+        }
+        fileInput.value = '';
+      };
+      reader.readAsText(files[0]);
+    });
     document.querySelectorAll('input[name="mode"]').forEach(el => {
       el.addEventListener('change', (e) => {
         const newMode = (e.target as HTMLInputElement).value as 'pvp' | 'ai';
