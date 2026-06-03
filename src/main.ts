@@ -680,6 +680,19 @@ class ChessGame {
           const img = document.createElement('img');
           img.src = getPiecePaths()[piece.color][piece.type];
           img.alt = `${piece.color} ${piece.type}`;
+
+          // Mirror pieces based on board position
+          const typeConfig = getPieceConfig().pieceTypes[piece.type];
+          const mirrorH = typeConfig?.mirrorH ?? false;
+          const mirrorV = typeConfig?.mirrorV ?? false;
+          if (mirrorH || mirrorV) {
+            const scaleX = mirrorH && col >= this.state.width / 2 ? -1 : 1;
+            const scaleY = mirrorV && row >= this.state.height / 2 ? -1 : 1;
+            if (scaleX !== 1 || scaleY !== 1) {
+              img.style.transform = `scaleX(${scaleX}) scaleY(${scaleY})`;
+            }
+          }
+
           pieceEl.appendChild(img);
           square.appendChild(pieceEl);
         }

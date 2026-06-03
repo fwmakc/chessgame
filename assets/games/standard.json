@@ -19,6 +19,7 @@
     "pieceTypes": {
       "bishop": {
         "value": 330,
+        "mirrorH": true,
         "behaviors": [
           {
             "vectors": [[1, 1], [1, -1], [-1, 1], [-1, -1]],
@@ -30,6 +31,7 @@
       },
       "knight": {
         "value": 320,
+        "mirrorH": true,
         "behaviors": [
           {
             "vectors": [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]],
@@ -41,6 +43,7 @@
       },
       "rook": {
         "value": 500,
+        "mirrorH": true,
         "behaviors": [
           {
             "vectors": [[1, 0], [-1, 0], [0, 1], [0, -1]],
@@ -52,6 +55,7 @@
       },
       "queen": {
         "value": 900,
+        "mirrorH": true,
         "behaviors": [
           {
             "vectors": [[1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [-1, 0], [0, 1], [0, -1]],
@@ -63,6 +67,7 @@
       },
       "king": {
         "value": 20000,
+        "mirrorH": true,
         "behaviors": [
           {
             "vectors": [[1, 1], [1, 0], [1, -1], [0, 1], [0, -1], [-1, 1], [-1, 0], [-1, -1]],
@@ -89,6 +94,7 @@
       },
       "pawn": {
         "value": 100,
+        "mirrorH": true,
         "behaviors": [
           {
             "vectors": [[0, -1]],

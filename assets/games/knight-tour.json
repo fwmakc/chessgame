@@ -22,6 +22,7 @@
     "pieceTypes": {
       "knight": {
         "value": 1,
+        "mirrorH": true,
         "behaviors": [
           {
             "vectors": [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]],

@@ -42,6 +42,8 @@ export interface PieceTypeConfig {
   castling?: CastlingRule[];
   promotionTarget?: PieceType;
   value?: number;
+  mirrorH?: boolean;
+  mirrorV?: boolean;
 }
 
 export interface PieceConfig {

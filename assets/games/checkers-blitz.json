@@ -48,6 +48,7 @@
     "pieceTypes": {
       "checker": {
         "value": 1,
+        "mirrorH": true,
         "behaviors": [
           {
             "vectors": [[1, -1], [-1, -1]],
@@ -69,6 +70,7 @@
       },
       "checkerKing": {
         "value": 3,
+        "mirrorH": true,
         "behaviors": [
           {
             "vectors": [[1, 1], [1, -1], [-1, 1], [-1, -1]],
