@@ -314,6 +314,7 @@ class ChessGame {
 
     const flipCheckbox = document.getElementById('flip-board') as HTMLInputElement;
     if (flipCheckbox) flipCheckbox.checked = this.flipBoard;
+
   }
 
   private applySkin(skinId: string): void {

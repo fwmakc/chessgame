@@ -84,3 +84,27 @@
 }
 
 
+
+/* 3D perspective for this skin */
+.board-layout {
+  perspective: 800px;
+}
+
+.board-wrapper {
+  transform: rotateX(55deg);
+  transform-style: preserve-3d;
+}
+
+.board-wrapper .board-bg,
+.board-wrapper #board {
+  transform-style: preserve-3d;
+}
+
+.board-wrapper .square {
+  transform-style: preserve-3d;
+}
+
+.board-wrapper .piece {
+  transform: rotateX(-55deg);
+  transform-origin: center bottom;
+}

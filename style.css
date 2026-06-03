@@ -112,6 +112,14 @@ button:hover {
   justify-content: center;
 }
 
+/* ===== BOARD LAYOUT ===== */
+.board-layout {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: center;
+}
+
 /* ===== BOARD WRAPPER ===== */
 .board-wrapper {
   display: inline-block;
